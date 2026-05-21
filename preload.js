@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   switchProfile: (name) => ipcRenderer.invoke('switch-profile', name),
   createProfile: (name, baseConfig) => ipcRenderer.invoke('create-profile', name, baseConfig),
   deleteProfile: (name) => ipcRenderer.invoke('delete-profile', name),
+  renameProfile: (oldName, newName) => ipcRenderer.invoke('rename-profile', oldName, newName),
+  cloneProfile: (sourceName, newName) => ipcRenderer.invoke('clone-profile', sourceName, newName),
   exportCsv: (records) => ipcRenderer.invoke('export-csv', records),
   getStatsHistory: () => ipcRenderer.invoke('get-stats-history'),
   clearStatsHistory: () => ipcRenderer.invoke('clear-stats-history'),

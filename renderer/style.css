@@ -188,6 +188,13 @@ body {
 }
 .profile-select:focus { border-color: var(--accent); }
 
+.group-controls {
+  display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+}
+.group-controls .btn {
+  padding: 4px 7px; font-size: 12px; min-width: 26px;
+}
+
 .toolbar .running-count {
   margin-left: auto;
   display: flex; align-items: center; gap: 7px;

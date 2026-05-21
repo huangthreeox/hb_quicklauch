@@ -94,11 +94,11 @@ function toggleTheme() {
   document.getElementById('btnTheme').innerHTML = isDark ? '&#9790;' : '&#9788;';
 }
 
-// ==================== Profile 管理 ====================
+// ==================== Group 管理 ====================
 function renderProfileSelect() {
   profileSelect.innerHTML = profileNames.map(p => `
     <option value="${escapeHtml(p.name)}" ${p.name === activeProfile ? 'selected' : ''}>
-      ${escapeHtml(p.name)} (${p.appCount} apps)
+      ${escapeHtml(p.name)} (${p.appCount})
     </option>
   `).join('');
 }
@@ -106,6 +106,7 @@ function renderProfileSelect() {
 async function switchProfile() {
   const name = profileSelect.value;
   if (name === activeProfile) return;
+  await saveConfigOnly(); // 保存当前分组
 
   const result = await window.electronAPI.switchProfile(name);
   if (!result.success) {
@@ -116,44 +117,58 @@ async function switchProfile() {
   config = result.config;
   activeProfile = result.config.activeProfile;
   currentApps = { ...config.apps };
-  renderFolders();
-  renderAppList();
-  updateCounts();
-  renderProfileSelect();
-  setStatus(`Switched to "${activeProfile}"`, 'info');
+  const chk = $('chkRecording'); if (chk) chk.checked = config.recordingEnabled !== false;
+  renderFolders(); renderAppList(); updateCounts();
+  setStatus(`Group: "${activeProfile}"`, 'success');
 }
 
-async function saveAsProfile() {
-  const name = await showModal();
-  if (!name) return;
-
-  const cleanConfig = buildCleanConfig();
-  const result = await window.electronAPI.createProfile(name, cleanConfig);
-  if (!result.success) {
-    setStatus(`Save failed: ${result.error}`, 'error');
-    return;
-  }
-
-  config = result.config;
-  activeProfile = result.config.activeProfile;
+async function newGroup() {
+  const name = await showModal(); if (!name) return;
+  const result = await window.electronAPI.createProfile(name, { folders: [], apps: {}, recordingEnabled: true });
+  if (!result.success) { setStatus(`Failed: ${result.error}`, 'error'); return; }
+  config = result.config; activeProfile = result.config.activeProfile;
   currentApps = { ...config.apps };
   await refreshProfilesAndUI();
-  setStatus(`Created profile: "${name}"`, 'success');
+  renderFolders(); renderAppList(); updateCounts();
+  const chk = $('chkRecording'); if (chk) chk.checked = true;
+  setStatus(`Created group: "${name}"`, 'success');
+}
+
+async function renameGroup() {
+  const newName = await showModal(); if (!newName) return;
+  const result = await window.electronAPI.renameProfile(activeProfile, newName);
+  if (!result.success) { setStatus(`Failed: ${result.error}`, 'error'); return; }
+  activeProfile = result.newName; profileNames = result.profiles; renderProfileSelect();
+  setStatus(`Renamed to "${result.newName}"`, 'success');
+}
+
+async function cloneGroup() {
+  const name = await showModal(); if (!name) return;
+  const result = await window.electronAPI.cloneProfile(activeProfile, name);
+  if (!result.success) { setStatus(`Failed: ${result.error}`, 'error'); return; }
+  profileNames = result.profiles; renderProfileSelect();
+  setStatus(`Cloned to "${name}"`, 'success');
+}
+
+async function deleteGroup() {
+  if (!confirm(`Delete group "${activeProfile}"?`)) return;
+  const result = await window.electronAPI.deleteProfile(activeProfile);
+  if (!result.success) { setStatus(`Failed: ${result.error}`, 'error'); return; }
+  const data = await window.electronAPI.getConfig();
+  config = data; activeProfile = data.activeProfile; currentApps = { ...config.apps };
+  await refreshProfilesAndUI();
+  const chk = $('chkRecording'); if (chk) chk.checked = config.recordingEnabled !== false;
+  renderFolders(); renderAppList(); updateCounts();
+  setStatus(`Active: "${activeProfile}"`, 'info');
 }
 
 function buildCleanConfig() {
   const clean = { folders: [...config.folders], apps: {}, recordingEnabled: config.recordingEnabled };
   for (const [appPath, appInfo] of Object.entries(config.apps)) {
     clean.apps[appPath] = {
-      name: appInfo.name,
-      baseName: appInfo.baseName || '',
-      path: appInfo.path,
-      args: appInfo.args,
-      enabled: appInfo.enabled,
-      customName: appInfo.customName || '',
-      delay: appInfo.delay || 0,
-      order: appInfo.order ?? 0,
-      runAsAdmin: appInfo.runAsAdmin !== false
+      name: appInfo.name, baseName: appInfo.baseName || '', path: appInfo.path,
+      args: appInfo.args, enabled: appInfo.enabled, customName: appInfo.customName || '',
+      delay: appInfo.delay || 0, order: appInfo.order ?? 0, runAsAdmin: appInfo.runAsAdmin !== false
     };
   }
   return clean;
@@ -891,6 +906,10 @@ $('chkRecording').addEventListener('change', async (e) => {
   }
   setStatus(`CSV recording ${e.target.checked ? 'ON' : 'OFF'}`, 'info');
 });
+$('btnNewGroup').addEventListener('click', newGroup);
+$('btnRenameGroup').addEventListener('click', renameGroup);
+$('btnCloneGroup').addEventListener('click', cloneGroup);
+$('btnDelGroup').addEventListener('click', deleteGroup);
 profileSelect.addEventListener('change', switchProfile);
 
 folderPathInput.addEventListener('keydown', (e) => {
@@ -929,8 +948,10 @@ window.toggleAppEnabled = toggleAppEnabled;
 window.removeSingleApp = removeSingleApp;
 window.removeDisabledApps = removeDisabledApps;
 window.switchProfile = switchProfile;
-window.saveAsProfile = saveAsProfile;
-window.deleteActiveProfile = deleteActiveProfile;
+window.newGroup = newGroup;
+window.renameGroup = renameGroup;
+window.cloneGroup = cloneGroup;
+window.deleteGroup = deleteGroup;
 window.openConfigFile = openConfigFile;
 window.exportConfigFile = exportConfigFile;
 window.exportStatsCsv = exportStatsCsv;

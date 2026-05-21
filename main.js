@@ -487,17 +487,42 @@ ipcMain.handle('delete-profile', (event, name) => {
   const data = loadAllData();
   const keys = Object.keys(data.profiles);
   if (keys.length <= 1) {
-    return { success: false, error: 'Cannot delete the last profile' };
+    return { success: false, error: 'Cannot delete the last group' };
   }
   if (!data.profiles[name]) {
-    return { success: false, error: 'Profile not found' };
+    return { success: false, error: 'Group not found' };
   }
   delete data.profiles[name];
   if (data.active === name) {
     data.active = Object.keys(data.profiles)[0];
   }
   saveAllData(data);
-  return { success: true, active: data.active };
+  loadRecordingState();
+  return { success: true, active: data.active, config: getActiveConfig() };
+});
+
+ipcMain.handle('rename-profile', (event, oldName, newName) => {
+  if (!newName || !newName.trim()) return { success: false, error: 'Name required' };
+  const trimmed = newName.trim();
+  const data = loadAllData();
+  if (!data.profiles[oldName]) return { success: false, error: 'Group not found' };
+  if (trimmed !== oldName && data.profiles[trimmed]) return { success: false, error: 'Name already exists' };
+  data.profiles[trimmed] = data.profiles[oldName];
+  if (trimmed !== oldName) delete data.profiles[oldName];
+  if (data.active === oldName) data.active = trimmed;
+  saveAllData(data);
+  return { success: true, newName: trimmed, profiles: Object.keys(data.profiles).map(n => ({ name: n, appCount: Object.keys(data.profiles[n].apps || {}).length })), active: data.active };
+});
+
+ipcMain.handle('clone-profile', (event, sourceName, newName) => {
+  if (!newName || !newName.trim()) return { success: false, error: 'Name required' };
+  const trimmed = newName.trim();
+  const data = loadAllData();
+  if (!data.profiles[sourceName]) return { success: false, error: 'Source group not found' };
+  if (data.profiles[trimmed]) return { success: false, error: 'Name already exists' };
+  data.profiles[trimmed] = JSON.parse(JSON.stringify(data.profiles[sourceName]));
+  saveAllData(data);
+  return { success: true, profiles: Object.keys(data.profiles).map(n => ({ name: n, appCount: Object.keys(data.profiles[n].apps || {}).length })), active: data.active };
 });
 
 ipcMain.handle('scan-folder', (event, folderPath) => {

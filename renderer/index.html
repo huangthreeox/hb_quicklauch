@@ -22,7 +22,13 @@
 
     <!-- ====== 紧凑主操作栏（始终可见） ====== -->
     <section class="toolbar">
-      <select id="profileSelect" class="profile-select"></select>
+      <div class="group-controls">
+        <select id="profileSelect" class="profile-select"></select>
+        <button id="btnNewGroup" class="btn btn-outline btn-sm" title="New Group">+</button>
+        <button id="btnRenameGroup" class="btn btn-outline btn-sm" title="Rename">&#9998;</button>
+        <button id="btnCloneGroup" class="btn btn-outline btn-sm" title="Duplicate">&#9113;</button>
+        <button id="btnDelGroup" class="btn btn-outline btn-sm" title="Delete">&#10005;</button>
+      </div>
       <button id="btnStartAll" class="btn btn-success">&#9654; Start All</button>
       <button id="btnStopAll" class="btn btn-danger">&#9632; Stop All</button>
       <button id="btnScanAll" class="btn btn-primary">Scan</button>
