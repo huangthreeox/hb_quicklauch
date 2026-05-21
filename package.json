@@ -5,9 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "dist": "electron-builder --win --x64"
   },
-  "author": "",
+  "author": "huangthreeox",
   "license": "MIT",
   "devDependencies": {
     "electron": "^30.5.1",
@@ -19,8 +20,24 @@
     "directories": {
       "output": "dist"
     },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json"
+    ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "huangthreeox",
+      "repo": "hb_quicklauch"
     }
   }
 }
