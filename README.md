@@ -1,54 +1,47 @@
 # QuickLaunch
 
-> 轻量级 Windows 应用程序启动管理器，基于 Electron
+> Lightweight Windows application launcher built with Electron
 
-## 截图
+![screenshot](image.png)
 
-![alt text](image.png)
+## Features
 
-## 功能特性
+- **Scan folders** for all `.exe` files
+- **Single / Batch** start & stop applications
+- **Drag & drop** reorder + **delay startup** (500ms step)
+- Per-app settings: **launch arguments**, custom **alias**, **admin** mode
+- Real-time **CPU / Memory** per process + system CPU
+- **Operation logs** (daily rotation)
+- **CSV export** of performance history
+- Multi **Profile** management + JSON config import/export
+- Light / Dark theme
+- **Minimize to tray** on close
 
-- **扫描指定文件夹**下的所有 `.exe` 可执行文件
-- **单个 / 批量**启动、停止应用程序
-- **拖拽排序**启动顺序 + **延迟启动**（500ms 步长）
-- 每应用独立设置：**启动参数**、自定义**别名**、**管理员权限**运行
-- 实时显示每个进程 **CPU / 内存**占用及系统 CPU 使用率
-- **操作日志**自动记录（按天分割）
-- **CSV 数据导出** 性能历史
-- 多 **Profile** 管理 + JSON 配置导入/导出
-- 暗色/亮色主题切换
-- 关闭窗口**最小化到系统托盘**
-
-## 快速开始
+## Quick Start
 
 ```bash
-# 克隆
 git clone https://github.com/huangthreeox/hb_quicklauch.git
 cd hb_quicklauch
-
-# 安装依赖
 npm install
-
-# 运行
 npm start
 ```
 
-## 使用说明
+## Usage
 
-1. 点击工具栏 **⚙** 展开设置面板
-2. 添加包含 `.exe` 的文件夹 → 点击 **Scan**
-3. 点击应用名称编辑别名，填写 Args / Delay / Adm
-4. **⠿ 拖拽**卡片调整顺序
-5. **▶ Start All** 按顺序 + 延迟启动
+1. Click **⚙** to open settings
+2. Add folders → **Scan**
+3. Edit alias, Args, Delay, Adm per app
+4. **⠿ Drag** cards to reorder
+5. **▶ Start All** launches in order with delay
 
-## 技术栈
+## Tech Stack
 
-| 层 | 技术 |
+| Layer | Tech |
 |---|---|
-| 框架 | Electron 30 |
-| 界面 | HTML / CSS / JavaScript |
-| 进程监控 | PowerShell (WMI) |
-| 日志 | 纯文本，按天分割 |
+| Framework | Electron 30 |
+| UI | HTML / CSS / JavaScript |
+| Monitoring | PowerShell (WMI) |
+| Logging | Plain text, daily rotation |
 
 ## License
 
